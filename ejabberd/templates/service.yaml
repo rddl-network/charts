@@ -7,9 +7,25 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
+    - port: {{ .Values.service.port.xmpp }}
+      targetPort: xmpp
+      protocol: TCP
+      name: xmpp
+    - port: {{ .Values.service.port.fed }}
+      targetPort: fed
+      protocol: TCP
+      name: fed
+    - port: {{ .Values.service.port.http }}
       targetPort: http
       protocol: TCP
       name: http
+    - port: {{ .Values.service.port.https }}
+      targetPort: https
+      protocol: TCP
+      name: https
+    - port: {{ .Values.service.port.mqtt }}
+      targetPort: mqtt
+      protocol: TCP
+      name: mqtt
   selector:
     {{- include "ejabberd.selectorLabels" . | nindent 4 }}

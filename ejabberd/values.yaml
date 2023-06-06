@@ -5,14 +5,14 @@
 replicaCount: 1
 
 image:
-  repository: nginx
+  repository: ejabberd/ecs
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
 imagePullSecrets: []
 nameOverride: ""
-fullnameOverride: ""
+fullnameOverride: "ejabberd"
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -38,7 +38,12 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 80
+  port:
+    xmpp: 5222
+    fed: 5269
+    http: 5280
+    https: 5443
+    mqtt: 1883
 
 ingress:
   enabled: false
@@ -56,17 +61,24 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+environment:
+  domain: m2m.rddl.io
+  ctlOnCreate: register admin m2m.rddl.io passw0rd
+  ctlOnStart: registered_users m2m.rddl.io
+
+persistence:
+  storageClassName: hostpath
+  size:
+    database: 1Gi
+    upload: 2Gi
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1024Mi
+  requests:
+    cpu: 500m
+    memory: 512Mi
 
 autoscaling:
   enabled: false
