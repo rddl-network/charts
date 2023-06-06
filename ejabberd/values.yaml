@@ -92,3 +92,19 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "#ArgoCD"
+    username: "admin"
+    password: "#ArgoCD"
+    database: "ejabberd"
+    replicationPassword: "#ArgoCD"
+  fullnameOverride: "postgresql"
+  primary:
+    persistence:
+      storageClass: "#ArgoCD"
+  readReplicas:
+    persistence:
+      storageClass: "#ArgoCD"

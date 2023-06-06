@@ -152,7 +152,11 @@ data:
         ## Mnesia is limited to 2GB, better to use an SQL backend
         ## For small servers SQLite is a good fit and is very easy
         ## to configure. Uncomment this when you have SQL configured:
+        {{- if not .Values.postgresql.enabled }}
         ## db_type: sql
+        {{- else }}
+        db_type: sql
+        {{- end }}
         assume_mam_usage: true
         default: never
       mod_mqtt: {}
@@ -206,3 +210,14 @@ data:
       mod_vcard_xupdate: {}
       mod_version:
         show_os: false
+    {{- if .Values.postgresql.enabled }}
+    new_sql_schema: true
+    sql_type: pgsql
+    sql_server: {{ .Values.postgresql.fullnameOverride }}
+    sql_database: {{ .Values.postgresql.auth.database }}
+    sql_username: {{ .Values.postgresql.auth.username }}
+    sql_password: {{ .Values.postgresql.auth.password }}
+    auth_method: [sql]
+    auth_password_format: scram
+    default_db: sql
+    {{- end }}

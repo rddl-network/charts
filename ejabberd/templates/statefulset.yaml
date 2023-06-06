@@ -28,6 +28,23 @@ spec:
       serviceAccountName: {{ include "ejabberd.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.postgresql.enabled }}
+      initContainers:
+        - name: wait-for-pg
+          image: alpine
+          command:
+            - sh
+            - '-c'
+            - >-
+              apk add -u net-tools postgresql &&
+              echo -e "Waiting for PostgreSQL database..." &&
+              while ! nc -z {{ .Values.postgresql.fullnameOverride }} {{ .Values.postgresql.primary.service.ports.postgresql }}; do sleep 1; done &&
+              echo -e ">> PostgreSQL Server has started" &&
+              echo -e "Applying ejabberd schema..." &&
+              wget https://raw.githubusercontent.com/processone/ejabberd/{{ .Values.image.tag | default .Chart.AppVersion }}/sql/pg.new.sql &&
+              PGPASSWORD={{ .Values.postgresql.auth.password }} psql -h {{ .Values.postgresql.fullnameOverride }} -U {{ .Values.postgresql.auth.username }} {{ .Values.postgresql.auth.database }} < ./pg.new.sql &&
+              echo -e ">> Schema successfully applied";
+      {{- end}}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -67,8 +84,10 @@ spec:
             - name: {{ .Chart.Name }}-conf
               mountPath: /home/ejabberd/conf/ejabberd.yml
               subPath: ejabberd.yml
+            {{- if not .Values.postgresql.enabled }}
             - name: {{ .Chart.Name }}-database
               mountPath: /home/ejabberd/database/
+            {{- end }}
             - name: {{ .Chart.Name }}-upload
               mountPath: /home/ejabberd/upload/
       volumes:
@@ -88,6 +107,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
   volumeClaimTemplates:
+    {{- if not .Values.postgresql.enabled }}
     - apiVersion: v1
       kind: PersistentVolumeClaim
       metadata:
@@ -99,6 +119,7 @@ spec:
         resources:
           requests:
             storage: {{ .Values.persistence.size.database | quote }}
+    {{- end }}
     - apiVersion: v1
       kind: PersistentVolumeClaim
       metadata:
