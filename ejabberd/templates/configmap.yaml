@@ -71,6 +71,9 @@ data:
         user:
           - "admin@{{ .Values.environment.domain }}"
     access_rules:
+      jwt_only:
+        deny: admin
+        allow: all
       local:
         allow: local
       c2s:
@@ -217,7 +220,20 @@ data:
     sql_database: {{ .Values.postgresql.auth.database }}
     sql_username: {{ .Values.postgresql.auth.username }}
     sql_password: {{ .Values.postgresql.auth.password }}
-    auth_method: [sql]
+    auth_method: [jwt, sql]
     auth_password_format: scram
     default_db: sql
+    jwt_jid_field: "actor"
+    jwt_auth_only_rule: jwt_only
+    jwt_key: /home/ejabberd/conf/jwt.key
     {{- end }}
+  jwt.key: |
+    {
+      "kty": "oct",
+      "use": "sig",
+      "kid": {{ .Values.jwt.kid }},
+      "k": {{ .Values.jwt.k }},
+      "alg": "HS256"
+    }
+    {{- end }}
+
