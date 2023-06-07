@@ -84,6 +84,9 @@ spec:
             - name: {{ .Chart.Name }}-conf
               mountPath: /home/ejabberd/conf/ejabberd.yml
               subPath: ejabberd.yml
+            - name: {{ .Chart.Name }}-conf
+              mountPath: /home/ejabberd/conf/jwt.key
+              subPath: jwt.key
             {{- if not .Values.postgresql.enabled }}
             - name: {{ .Chart.Name }}-database
               mountPath: /home/ejabberd/database/
