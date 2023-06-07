@@ -66,6 +66,10 @@ environment:
   ctlOnCreate: register admin m2m.rddl.io passw0rd
   ctlOnStart: registered_users m2m.rddl.io
 
+jwt:
+  k: "Set in #ArgoCD"
+  kid: "Set in #ArgoCD"
+
 persistence:
   storageClassName: hostpath
   size:
