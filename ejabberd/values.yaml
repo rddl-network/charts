@@ -73,7 +73,7 @@ jwt:
 persistence:
   storageClassName: hostpath
   size:
-    database: 1Gi
+    database: 128Mi
     upload: 2Gi
 
 resources:

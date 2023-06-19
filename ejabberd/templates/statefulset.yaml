@@ -87,10 +87,8 @@ spec:
             - name: {{ .Chart.Name }}-conf
               mountPath: /home/ejabberd/conf/jwt.key
               subPath: jwt.key
-            {{- if not .Values.postgresql.enabled }}
             - name: {{ .Chart.Name }}-database
               mountPath: /home/ejabberd/database/
-            {{- end }}
             - name: {{ .Chart.Name }}-upload
               mountPath: /home/ejabberd/upload/
       volumes:
@@ -110,7 +108,6 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
   volumeClaimTemplates:
-    {{- if not .Values.postgresql.enabled }}
     - apiVersion: v1
       kind: PersistentVolumeClaim
       metadata:
@@ -122,7 +119,6 @@ spec:
         resources:
           requests:
             storage: {{ .Values.persistence.size.database | quote }}
-    {{- end }}
     - apiVersion: v1
       kind: PersistentVolumeClaim
       metadata:
