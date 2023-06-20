@@ -74,7 +74,6 @@ persistence:
   storageClassName: hostpath
   size:
     database: 128Mi
-    upload: 2Gi
 
 resources:
   limits:

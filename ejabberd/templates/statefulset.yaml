@@ -89,8 +89,6 @@ spec:
               subPath: jwt.key
             - name: {{ .Chart.Name }}-database
               mountPath: /home/ejabberd/database/
-            - name: {{ .Chart.Name }}-upload
-              mountPath: /home/ejabberd/upload/
       volumes:
         - name: {{ .Chart.Name }}-conf
           configMap:
@@ -119,14 +117,3 @@ spec:
         resources:
           requests:
             storage: {{ .Values.persistence.size.database | quote }}
-    - apiVersion: v1
-      kind: PersistentVolumeClaim
-      metadata:
-        name: {{ .Chart.Name }}-upload
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        storageClassName: {{ .Values.persistence.storageClassName }}
-        resources:
-          requests:
-            storage: {{ .Values.persistence.size.upload | quote }}
