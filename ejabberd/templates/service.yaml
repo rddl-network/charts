@@ -27,5 +27,11 @@ spec:
       targetPort: mqtt
       protocol: TCP
       name: mqtt
+    {{- range untilStep 4369 4400 1 }}
+    - port: {{ . }}
+      targetPort: {{ . }}
+      protocol: TCP
+      name: int-comm-{{ . }}
+    {{- end }}
   selector:
     {{- include "ejabberd.selectorLabels" . | nindent 4 }}
