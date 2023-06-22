@@ -51,6 +51,10 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - sh
+            - '-c'
+            - /home/ejabberd/cluster/cluster.sh
           env:
             - name: ERLANG_COOKIE
               value: {{ .Values.environment.erlangCookie }}
@@ -84,6 +88,9 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: {{ .Chart.Name }}-conf
+              mountPath: /home/ejabberd/cluster/cluster.sh
+              subPath: cluster.sh
+            - name: {{ .Chart.Name }}-conf
               mountPath: /home/ejabberd/conf/ejabberd.yml
               subPath: ejabberd.yml
             - name: {{ .Chart.Name }}-conf
@@ -95,6 +102,7 @@ spec:
         - name: {{ .Chart.Name }}-conf
           configMap:
             name: {{ include "ejabberd.fullname" . }}
+            defaultMode: 0755
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
