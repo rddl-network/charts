@@ -5,6 +5,49 @@ metadata:
   labels:
     {{- include "ejabberd.labels" . | nindent 4 }}
 data:
+  cluster.sh: |
+    #!/usr/bin/env sh
+    EJABBERDCTL=$HOME/bin/ejabberdctl
+    HOSTNAME_S=$(hostname -s) # ejabberd-0
+    HOSTNAME_F=$(hostname -f) # ejabberd-0.ejabberd.default.svc.cluster.local
+    SERVICE="ejabberd.{{ .Release.Namespace }}.svc.cluster.local" # ejabberd.default.svc.cluster.local
+    export ERLANG_NODE_ARG="ejabberd@$HOSTNAME_F" # ejabberd@ejabberd-0.ejabberd.default.svc.cluster.local
+    ERLANG_NODE=$ERLANG_NODE_ARG
+    MAIN="ejabberd-0"
+    while true
+    do
+      if [[ "$HOSTNAME_S" == "$MAIN" ]] ; then
+          echo "main node, skipping clustering"
+          break
+      fi
+      $EJABBERDCTL start
+      $EJABBERDCTL started
+      echo "trying to connect to node with hostname $MAIN.$SERVICE"
+      $EJABBERDCTL join_cluster "ejabberd@$MAIN.$SERVICE"
+      CLUSTERING_RESULT=$?
+      if [[ $CLUSTERING_RESULT -eq 0 ]] ; then
+          echo "successfully joined";
+          $EJABBERDCTL list_cluster
+      else
+          echo "failed to join, trying again";
+      fi
+      $EJABBERDCTL stop
+      $EJABBERDCTL stopped
+      if [[ $CLUSTERING_RESULT -eq 0 ]] ; then
+        break
+      fi
+    done
+    # Define cleanup procedure
+    cleanup() {
+        echo "Container stopped, performing cleanup..."
+        $EJABBERDCTL leave_cluster "$ERLANG_NODE_ARG"
+    }
+    # Trap SIGTERM
+    trap 'cleanup' SIGTERM
+    echo "launching in foreground"
+    $EJABBERDCTL foreground &
+    # Wait
+    wait $!
   ejabberd.yml: |
     hosts:
       - {{ .Values.environment.domain }}
